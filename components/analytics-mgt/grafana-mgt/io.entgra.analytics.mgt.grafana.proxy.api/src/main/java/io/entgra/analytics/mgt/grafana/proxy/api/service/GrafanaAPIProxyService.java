@@ -58,9 +58,9 @@ import javax.ws.rs.core.UriInfo;
                 @Scope(
                         name = "Using Grafana APIs required for Grafana iframes",
                         description = "Grafana API proxy to validate requests.",
-                        key = "perm:grafana:api:view",
-                        roles = {"Internal/grafanamgt-user"},
-                        permissions = {"/analytics-mgt/grafana-mgt/api/view"}
+                        key = "grafana:api:view",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/device-mgt/grafana/view"}
                 )
         }
 )
@@ -84,7 +84,7 @@ public interface GrafanaAPIProxyService {
             tags = "Analytics",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:grafana:api:view")
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
                     })
             }
     )
@@ -101,11 +101,45 @@ public interface GrafanaAPIProxyService {
             tags = "Analytics",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:grafana:api:view")
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
                     })
             }
     )
     Response frontendMetrics(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/user/auth-tokens/rotate")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Rotate authentication tokens",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response rotateAuthToken(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/dashboards/import")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Import grafana dashboards",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response importDashboards(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -117,11 +151,27 @@ public interface GrafanaAPIProxyService {
             tags = "Analytics",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:grafana:api:view")
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
                     })
             }
     )
     Response getDashboard(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/folders/{uid}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Grafana dashboard folder information",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response getFolders(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -134,11 +184,46 @@ public interface GrafanaAPIProxyService {
             tags = "Analytics",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:grafana:api:view")
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
                     })
             }
     )
     Response getAnnotations(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/prometheus/grafana/api/v1/rules")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Accessing Grafana Prometheus rule information",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+
+    Response prometheusRuleInfo(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/search")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Search folders and dashboards",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response searchFoldersAndDashboards(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -150,7 +235,7 @@ public interface GrafanaAPIProxyService {
             tags = "Analytics",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:grafana:api:view")
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
                     })
             }
     )

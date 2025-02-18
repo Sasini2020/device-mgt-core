@@ -4,9 +4,12 @@ import com.google.gson.JsonObject;
 import io.entgra.analytics.mgt.grafana.proxy.api.service.GrafanaAPIProxyService;
 import io.entgra.analytics.mgt.grafana.proxy.api.service.bean.ErrorResponse;
 import io.entgra.analytics.mgt.grafana.proxy.api.service.exception.RefererNotValid;
+import io.entgra.analytics.mgt.grafana.proxy.api.service.impl.util.GrafanaMgtAPIUtils;
 import io.entgra.analytics.mgt.grafana.proxy.api.service.impl.util.GrafanaRequestHandlerUtil;
 import io.entgra.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
 import io.entgra.analytics.mgt.grafana.proxy.core.bean.GrafanaPanelIdentifier;
+import io.entgra.analytics.mgt.grafana.proxy.core.config.GrafanaConfiguration;
+import io.entgra.analytics.mgt.grafana.proxy.core.config.GrafanaConfigurationManager;
 import io.entgra.analytics.mgt.grafana.proxy.core.exception.MaliciousQueryAttempt;
 import io.entgra.analytics.mgt.grafana.proxy.core.internal.GrafanaMgtDataHolder;
 import io.entgra.analytics.mgt.grafana.proxy.core.util.GrafanaUtil;
@@ -39,9 +42,13 @@ public class GrafanaAPIProxyServiceImpl implements GrafanaAPIProxyService {
     @Override
     public Response queryDatasource(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
         try {
+            GrafanaConfiguration configuration = GrafanaConfigurationManager.getInstance().getGrafanaConfiguration();
             GrafanaPanelIdentifier panelIdentifier = GrafanaRequestHandlerUtil.getPanelIdentifier(headers);
-            GrafanaMgtDataHolder.getInstance().getGrafanaQueryService().
-                    buildSafeQuery(body,  panelIdentifier.getDashboardId(), panelIdentifier.getPanelId(), requestUriInfo.getRequestUri());
+            boolean queryValidationConfig = configuration.getValidationConfig().getDSQueryValidation();
+            if (queryValidationConfig) {
+                GrafanaMgtAPIUtils.getGrafanaQueryService().buildSafeQuery(body, panelIdentifier.getDashboardId(),
+                        panelIdentifier.getPanelId(), requestUriInfo.getRequestUri());
+            }
             return GrafanaRequestHandlerUtil.proxyPassPostRequest(body, requestUriInfo, panelIdentifier.getOrgId());
         } catch (MaliciousQueryAttempt e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(
@@ -66,11 +73,37 @@ public class GrafanaAPIProxyServiceImpl implements GrafanaAPIProxyService {
         return proxyPassPostRequest(body, headers, requestUriInfo);
     }
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/user/auth-tokens/rotate")
+    @Override
+    public Response rotateAuthToken(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassPostRequest(body, headers, requestUriInfo);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/dashboards/import")
+    @Override
+    public Response importDashboards(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassPostRequest(body, headers, requestUriInfo);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/dashboards/uid/{uid}")
     @Override
     public Response getDashboard(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/folders/{uid}")
+    @Override
+    public Response getFolders(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
         return proxyPassGetRequest(headers, requestUriInfo);
     }
 
@@ -82,6 +115,25 @@ public class GrafanaAPIProxyServiceImpl implements GrafanaAPIProxyService {
     public Response getAnnotations(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
         return proxyPassGetRequest(headers, requestUriInfo);
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/prometheus/grafana/api/v1/rules")
+    @Override
+    public Response prometheusRuleInfo(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/search")
+    @Override
+    public Response searchFoldersAndDashboards(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/alerts/states-for-dashboard")

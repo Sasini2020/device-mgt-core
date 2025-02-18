@@ -89,6 +89,7 @@
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.email.sender.core.internal,
+                            !io.entgra.analytics.mgt.grafana.proxy.core.internal,
                             io.entgra.analytics.mgt.grafana.proxy.core.*
                         </Export-Package>
                         <Embed-Dependency>
